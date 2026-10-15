@@ -77,7 +77,7 @@ export const resume: Resume = {
     '工作中能使用英语交流，有较好的英语读写能力',
   ],
   skillGroups: [
-    { category: '云平台交付', detail: '华为云（HCS/HWS）、OpenStack：ECS / EVS / VPC / IMS 等 IaaS 组件的新建、扩容与交付部署' },
+    { category: '云平台交付', detail: '华为云（HCS）、OpenStack：ECS / EVS / VPC / IMS 等 IaaS 组件的新建、扩容与交付部署' },
     { category: '云原生', detail: 'Docker 容器化、Kubernetes 编排，容器管理与问题定位' },
     { category: '操作系统与运维', detail: 'Linux 系统管理与日常运维' },
     { category: '自动化', detail: 'Shell / Python 脚本处理批量运维与故障排查' },
