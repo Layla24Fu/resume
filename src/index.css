@@ -1,0 +1,110 @@
+/* 简历页样式 —— 模仿 PDF 版式：蓝色标题 + 一行三栏条目 */
+:root {
+  --text: #1a1b1c;
+  --text-secondary: #6b7280;
+  --border: #e4e3dd;
+  --bg: #f4f3ee;
+  --card: #ffffff;
+  --accent: #1f6feb; /* 标题蓝色（对齐 PDF 的蓝色标题层级） */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, 'Segoe UI', 'PingFang SC', Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.6;
+}
+
+/* 页面容器：浅色卡片居中，最大宽度限制保证大屏可读 */
+.resume {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px 20px;
+  background: var(--card);
+  min-height: 100vh;
+}
+
+.resume-header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.resume-header h1 {
+  margin: 0;
+  font-size: 30px;
+  color: var(--text);
+}
+
+.resume-title {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin: 4px 0;
+}
+
+/* 个人信息行：女·33岁 · 电话 · 邮箱 · 11年工作经验 */
+.resume-meta {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 6px 0 0;
+}
+
+.resume-section {
+  margin-bottom: 24px;
+}
+
+/* 板块标题：纯蓝色文字（对齐 PDF，去掉装饰条更贴近原版） */
+.resume-section h2 {
+  font-size: 17px;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+
+/* 通用条目列表（个人优势 / 专业技能 / 经历要点） */
+.resume-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13.5px;
+}
+
+.resume-list li {
+  margin-bottom: 4px;
+}
+
+/* 经历条目容器 */
+.resume-item {
+  margin-bottom: 16px;
+}
+
+/* 一行三栏：公司名 | 职位 | 时间（时间贴右） */
+.resume-item-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.resume-company {
+  flex: 0 1 auto;
+  font-weight: 600;
+  font-size: 14.5px;
+}
+
+.resume-role {
+  flex: 0 0 auto;
+  font-size: 13.5px;
+}
+
+.resume-period {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}

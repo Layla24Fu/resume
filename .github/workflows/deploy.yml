@@ -1,0 +1,87 @@
+# ============================================================
+# CI/CD 流水线 —— 本项目的"心脏"（GitHub Actions 工作流）
+#
+# 一句话理解：只要代码被 push 到 main 分支，GitHub 就会自动
+# 在它的虚拟机上执行下面的步骤，完成"构建 -> 测试 -> 发布"。
+# 你什么都不用做，这就是"持续集成/持续部署"。
+# ============================================================
+
+name: build-deploy   # 工作流名字，会显示在仓库 Actions 页面
+
+# ------------------------------------------------------------
+# on: 触发条件 —— 什么时候启动这条流水线
+# ------------------------------------------------------------
+on:
+  push:
+    branches: [main]      # 只有 push 到 main 分支才触发
+                         # ↑ 这是"持续部署"的语义核心：开发分支的改动
+                         #   不会直接上线，只有合入 main 才发布，可控可回滚
+  workflow_dispatch:     # 允许在 GitHub 网页上手动点"Run workflow"，方便调试
+
+# ------------------------------------------------------------
+# permissions: 权限声明 —— 告诉 GitHub 本工作流需要哪些权限
+# ------------------------------------------------------------
+permissions:
+  contents: read     # 读取仓库代码（checkout 步骤需要）
+  pages: write       # 写入 GitHub Pages 产物（部署步骤需要）
+  id-token: write    # OIDC 身份令牌：让部署用"身份自动认证"，
+                     # 无需手动创建/保存任何部署 Token（更安全）
+
+# ------------------------------------------------------------
+# concurrency: 并发控制 —— 同一时刻只允许一个部署在跑
+# ------------------------------------------------------------
+concurrency:
+  group: pages            # 所有部署归入同一组
+  cancel-in-progress: true  # 新的触发会取消旧的还在跑的部署，避免产物互相覆盖
+
+jobs:
+  # ==========================================================
+  # Job 1: build —— CI（质量门）
+  # 依次执行：装依赖 -> 查规范 -> 跑测试 -> 构建产物
+  # 任何一步失败，整个工作流红掉，后续 deploy 不会执行
+  # ==========================================================
+  build:
+    runs-on: ubuntu-latest   # 在 GitHub 提供的 Linux 虚拟机里执行
+    steps:
+      - uses: actions/checkout@v4
+        # 目的：把仓库里的代码下载到虚拟机，后续步骤才有东西可构建
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20   # 和本地版本一致，避免"本地能跑、CI 不能跑"
+          cache: npm         # 缓存 npm 依赖，加速后续每次构建
+
+      - run: npm ci
+        # 目的：按 package-lock.json 精确安装依赖
+        # 为什么不用 npm install：npm ci 完全按锁文件装，结果可复现，
+        # 避免"版本漂移"导致 CI 与本地行为不一致
+
+      - run: npm run lint
+        # 目的：代码规范检查（oxlint）。不符合规范直接失败
+
+      - run: npm run test
+        # 目的：跑单元测试（vitest）。测试变红 = 变更有问题 = 拦住不放行
+
+      - run: npm run build
+        # 目的：构建出最终静态站点，输出到 dist/ 目录
+        # 命令里的 tsc -b 先做 TypeScript 类型检查，类型错也会失败
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+        # 目的：把 dist/ 产物打包成"部署工件"上传，交给下一步 deploy
+
+  # ==========================================================
+  # Job 2: deploy —— CD（持续部署）
+  # needs: build 表示"build 成功后才运行"——质量门在这一步落地
+  # ==========================================================
+  deploy:
+    needs: build             # 依赖 Job 1：build 失败，本 Job 自动跳过
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}  # 部署后在此显示站点地址
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment       # 给本步起名 deployment，上面 url 引用它的输出
+        # 目的：把上传的工件发布到 GitHub Pages，站点立刻更新

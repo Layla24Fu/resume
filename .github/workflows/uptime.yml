@@ -1,0 +1,36 @@
+# ============================================================
+# 定时监控工作流 —— 站点"健康巡检"
+#
+# 作用：每天自动访问一次你的简历站点，发现打不开（非 200）
+# 就通过飞书机器人发告警。这是 DevOps 里"可观测性/告警"的最小实践。
+# ============================================================
+
+name: uptime-check
+
+on:
+  # schedule: 定时触发（cron 表达式）
+  # 注意：GitHub 的 cron 时区是 UTC（世界协调时），不是北京时间
+  # '0 0 * * *' = 每天 UTC 00:00 = 北京时间 08:00
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:   # 也支持手动触发，方便立刻测试一次
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          # 用 curl 请求站点，-w "%{http_code}" 只输出 HTTP 状态码
+          # 200 = 正常；404/500 等 = 站点出问题
+          code=$(curl -s -o /dev/null -w "%{http_code}" https://你的用户名.github.io/resume/)
+
+          echo "站点状态码: $code"
+
+          if [ "$code" != "200" ]; then
+            # 状态码不是 200：说明站点挂了，发飞书告警
+            # FEISHU_WEBHOOK 是存在仓库 Secrets 里的机器人地址（见操作手册）
+            # 用 ${{ secrets.XXX }} 引用 —— 地址不会出现在日志里，安全
+            curl -X POST -H 'Content-Type: application/json' \
+              -d '{"msg_type":"text","content":{"text":"⚠️ 简历站点挂了！HTTP '"$code"'"}}' \
+              "${{ secrets.FEISHU_WEBHOOK }}"
+          fi
