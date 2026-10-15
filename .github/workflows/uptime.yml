@@ -22,7 +22,7 @@ jobs:
       - run: |
           # 用 curl 请求站点，-w "%{http_code}" 只输出 HTTP 状态码
           # 200 = 正常；404/500 等 = 站点出问题
-          code=$(curl -s -o /dev/null -w "%{http_code}" https://你的用户名.github.io/resume/)
+          code=$(curl -s -o /dev/null -w "%{http_code}" https://layla24fu.github.io/resume/)
 
           echo "站点状态码: $code"
 
