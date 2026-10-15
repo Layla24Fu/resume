@@ -1,6 +1,22 @@
-# Resume 简历/作品集站（DevOps 实操项目）
+# DevOps Demo：简历静态站点自动化交付项目
+> 个人DevOps实战项目，演示完整CI/CD交付链路
 
-一个**零服务器成本**的简历/作品集静态站，用真实 CI/CD 流水线自动构建、测试、部署。
+## 项目介绍
+前端：Vite + React + TypeScript，静态简历展示页面
+DevOps：GitHub Actions 实现CI/CD，从代码提交到自动上线的完整自动化流程
+
+## CI/CD流水线工作流
+```mermaid
+graph LR
+A[Git提交代码] --> B[npm ci 安装锁定版本依赖]
+B --> C[oxlint 代码规范检查]
+C --> D[vitest 单元测试校验]
+D --> E[vite build 打包静态页面]
+E --> F[自动部署到 GitHub Pages]
+C -->|Lint失败| G[流水线中断，不部署]
+D -->|测试失败| G
+F --> H[站点监控，异常邮件告警]
+
 
 ## 技术栈
 
@@ -8,6 +24,7 @@
 - 测试：Vitest
 - CI/CD：GitHub Actions + GitHub Pages
 - 监控：GitHub Actions 定时检查 + UptimeRobot（可选）
+
 
 ## 快速开始
 
